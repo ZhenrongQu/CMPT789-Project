@@ -1,45 +1,62 @@
 import hashlib
+import os
+import datetime
 
-#This function is used to store the password in hash value to improve the security. New password and password list will be stored as hash(SHA256).
+
+def log_event(event, result):
+    with open("password_cracker_log.txt", "a") as log_file:
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        log_file.write(f"[{timestamp}] Event: {event}, Result: {result}\n")
+
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
-def add_to_file(password_list, content):
+def check_file_exists(filename):
+    return os.path.exists(filename)
+
+def add_to_file(resource, content):
     hashed_content = hash_password(content)
-    with open(password_list, 'a') as file:
+    with open(resource, 'a') as file:
         file.write(hashed_content + "\n")
+        log_event("Add Password", f"Password added: {content}")
 
-def search_and_update_file(password_list, password):
+def search_and_update_file(resource, password):
     hashed_password = hash_password(password)
-    with open(password_list, 'r') as file:
-        hashes = file.read().splitlines()
-        if hashed_password in hashes:
-            return "The password '{password}' exists in the file."
+    with open(resource, 'r') as file:
+        lines = file.read().splitlines()
+        if password in lines:
+            return f"The password '{password}' exists in the database, please choose another password."
+        if hashed_password in lines:
+            return f"The password '{password}' exists in the database, please choose another password."
+        log_event("Search Password", f"Password exist: {password}")
 
-    add_to_file(password_list, password)
-    return "Password is considered safe and has been hashed and added to the file."
-                
+    add_to_file(resource, password)
+    return "Password is considered safe and has been hashed and added to the database."
 
 def main():
-    password_list = "password-list.txt"
+    print("This program is used for detecting whether your password is being cracked or not")
+    resource = input("Enter the filename for the password list: ")
+    if not check_file_exists(resource):
+        print("Error: File not found.")
+        return
+    
     while True:
-        print("This program is used for detecting whether your password is being cracked or not")
         mode = input("Enter 'search' to search or 'add' to add content (or 'exit' to exit): ").strip().lower()
         
         if mode == "add":
             password = input("Enter password to add to the cracked list: ")
-            add_to_file(password_list, password)
+            add_to_file(resource, password)
             print("New password is added to the password list.")
         
         elif mode == "search":
             password = input("Enter password to search: ")
-            search_and_update_file(password_list, password)
+            result = search_and_update_file(resource, password)
+            print(result)
 
         elif mode == "exit":
             break
         else:
-            print("Error. Please enter 'search' or 'add' or 'exit'.")
+            print("Error. Please enter 'search', 'add', or 'exit'.")
 
 if __name__ == "__main__":
     main()
-
