@@ -36,7 +36,8 @@ def follow_log_file(log_file_path):
 
 # Function to check user credential
 def check_user_credential(input_user_name, input_password):
-    user_document = admin_info_collection.find_one({'Username': input_user_name, 'Password': input_password})
+    hashed_password = hash_input(input_password)
+    user_document = admin_info_collection.find_one({'Username': input_user_name, 'Password': hashed_password})
     hashed_user_document = admin_info_collection.find_one({'Username': hash_input(input_user_name), 'Password': hash_input(input_password)})
     if user_document or hashed_user_document:
         print("Login success! Welcome, " + input_user_name)
@@ -59,6 +60,7 @@ def create_user(input_user_name, input_password):
         })
         log_event("Create new user: " + input_user_name, " success!")
         print("User created!")
+    return
 
 # Function to search for a password
 def search_password(input_password):
@@ -147,7 +149,7 @@ def main():
         elif choice == '2':
             username = input("Enter new username: ")
             password = input("Enter new password: ")
-            print(create_user(username, password))
+            create_user(username, password)
         elif choice == '3':
             print("Good bye.")
             break
