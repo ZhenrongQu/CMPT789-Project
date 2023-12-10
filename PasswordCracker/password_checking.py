@@ -21,6 +21,12 @@ log_file_path = '/Users/quzhenrong/Desktop/CMPT789-Project/CMPT789-Project/Passw
 def hash_input(input):
     return hashlib.sha256(input.encode()).hexdigest()
 
+# Function to create log events
+def log_event(event, result):
+    with open("password_cracker_log.txt", "a") as log_file:
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        log_file.write(f"[{timestamp}] Event: {event}, Result: {result}\n")
+        
 # Function to trace activities log
 def follow_log_file(log_file_path):
     proc = subprocess.Popen(['tail', '-f', log_file_path], stdout=subprocess.PIPE)
@@ -84,11 +90,7 @@ def add_password(input_password):
     log_event("Add Password: " + input_password, " success!")
     log_event("Add Password: " + hashed_password, " success!") 
 
-# Function to create log events
-def log_event(event, result):
-    with open("password_cracker_log.txt", "a") as log_file:
-        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        log_file.write(f"[{timestamp}] Event: {event}, Result: {result}\n")
+
 
 # Main program logic
 def main():
@@ -110,6 +112,7 @@ def main():
                     print("Invalid input, please try again. Do you want to create a new user? (yes/no)")
             else:
                 while True:
+                    #If the user's role is admin, user have 3 functions
                     if role == 'admin':
                         print("Choose mode: 1. Search 2. Add 3. Check log 4. Log out")
                         admin_choice = input()
@@ -131,6 +134,7 @@ def main():
                             print("Log out as " + username)
                             log_event("Log out as: " + username, " success!")
                             break
+                    #If the user's role is user, only have 1 function
                     elif role == 'user':
                         print("Choose mode:1. Search  2. Exit")
                         user_choice = input()

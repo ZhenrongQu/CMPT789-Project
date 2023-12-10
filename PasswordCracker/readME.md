@@ -1,19 +1,31 @@
 Overview:
-This project is for CMPT789. The program is about password cracker, based on dictionary attack.
-Global variables list:
+This project is for CMPT789. The program is about to avoid the password cracker, based on dictionary attack.
+After the user enters a password, the program will match the password with each entry in the dictionary to check whether the password has been cracked. 
+
+Environment delpoyment:
+Download MongoDB Compass and Studio 3T
+Deploy the MongoDB environment:
+pip install pymongo
+brew services start mongodb
+check MongoDB status:
+brew services list
+
+
+
+Variables list:
 1. client: local MongoDB url: mongodb://localhost:27017/
-2. collection: current working collection
-3. userInfo: MongoDB collection stores user credential
-4. password_list: The password collection.
-5. role: user's role (login as admin or user)
-6. input_user_name: user input password used for credential
-7. input_user_password: user input password used for creential
-8. password: password retrieved from DB
-9. input_password: password used input used for check the dictionary
+2. userInfo: MongoDB collection stores user credential
+3. password_list: The password collection.
+4. role: user's role (login as admin or user)
+5. input_user_name: user input password used for credential
+6. input_user_password: user input password used for creential
+7. password: password retrieved from DB
+8. input_password: password used input used for check the dictionary
 9. hashed_password: hashed password by SHA256
-10. mode: user input to determine working mode:
+10. choice: user input to determine working mode:
 1, search: Perform MongoDB query to determine whether the password is already in the DB or not. This mode can be used by both admin and user.
 2, add: Add new password into DB. This mode can only be used by admin. When login as user, this method will not display.
+3，Check log: Only available for admin, it will display the activities log.
 11. hashed_password_list: The hashed password collection.
 12. event_log: The .txt file to store log event.
 
@@ -36,3 +48,4 @@ Function design:
 4. add_password: This function can only be used my admin user. It will add the password into the password collections in plaintext or sha256, plaintext will be add into collection password_list, hashed_password will be add into collection hashed_password_list. This will need to perform MongoDB query to create new object in the specific collection.
 5. convert_to_hash: This function is used to convert plain password to sha256.
 6. log_event: This function will be used to record the activities into, it will record: time, who, event and result.
+7. 
