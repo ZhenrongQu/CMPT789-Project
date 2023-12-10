@@ -96,7 +96,7 @@ def add_password(input_password):
 def main():
     while True:
         print("This program is used for detecting whether your password is in the dictionary or not")
-        print("Choose option: 1. Existing user 2. New user 3. Exit")
+        print("Choose option: 1. Existing user 2.Exit")
         choice = input()
         if choice == '1':
             username = input("Enter username: ")
@@ -114,7 +114,7 @@ def main():
                 while True:
                     #If the user's role is admin, user have 3 functions
                     if role == 'admin':
-                        print("Choose mode: 1. Search 2. Add 3. Check log 4. Log out")
+                        print("Choose mode: 1. Search 2. Add 3. Check log 4. Log out 5. New user")
                         admin_choice = input()
                         if admin_choice == '1':
                             password = input("Enter password to search: ")
@@ -134,6 +134,10 @@ def main():
                             print("Log out as " + username)
                             log_event("Log out as: " + username, " success!")
                             break
+                        elif admin_choice == '5':
+                            username = input("Enter new username: ")
+                            password = input("Enter new password: ")
+                            create_user(username, password)
                     #If the user's role is user, only have 1 function
                     elif role == 'user':
                         print("Choose mode:1. Search  2. Exit")
@@ -151,10 +155,6 @@ def main():
                 else:
                     break
         elif choice == '2':
-            username = input("Enter new username: ")
-            password = input("Enter new password: ")
-            create_user(username, password)
-        elif choice == '3':
             print("Good bye.")
             break
         else:
