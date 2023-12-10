@@ -4,6 +4,10 @@ After the user enters a password, the program will match the password with each 
 
 Environment delpoyment:
 Download MongoDB Compass and Studio 3T
+Create connection name: CMPT789-Project
+Create 3 local collections:
+Password-list1, hashedPassword-list1, userInfo
+Import the given collections
 Deploy the MongoDB environment:
 pip install pymongo
 brew services start mongodb
@@ -30,16 +34,16 @@ Variables list:
 12. event_log: The .txt file to store log event.
 
 Logic design:
-1. The program will ask to input:1. Existing user. 2. New user.
+1. The program will ask to input:1. Existing user. 2. Exit.
 If the input is 1, the program will ask the user input username(input_user_name) and password(input_password) at first, then the program will retrieve based on the information input in the MongoDB collection 'userInfo' and check the credential of users. If the input username and password is matching in the collection, then determine the user's role is admin or user based on the collection's element 'role'. If the inputted username or password is not exist, return error msg and ask whether to create a new user.
-If the input is 2, the program will ask the user input username(input_user_name) and password(input_password), then the program will store the username and password into userInfo collection.
+
 2. After verify the credential and the role is being determined:
-1, If the role is admin, it can choose the mode from search and add. Input 1 for search, 2 for add or 3 to check log, 4 to exit program. 
+1, If the role is admin, it can choose the mode from search and add. Input 1 for search, 2 for add or 3 to check log, 4 to exit program or 5 create new user. 
 2, If the role is user, it can only input 1 for search or 2 to exit program.
 In search mode, if the password is existing in password_list or it hashed password (hashed_password) is existing in the hashed_password_list, return password existing msg. If not existing, return password is not being used or safe. Then the plain password will be add into password_list and it hashed password will be add into hashed_password_list.
 In add mode, the admin can add the password into password_list and it hashed password will be add into hashed_password_list directly.
 In log mode, it will retrieve the log file to display all of the activities.
-
+In create new user mode, create user with given username and password and set the role to 'user'.
 
 Function design:
 1. check_user_credential: This function will be used to check user's input username and password from MongoDB collection userInfo. The field name in the object is 'Password' and 'Username'. If the input and field is matching, then pass the credential, and the role is be determined by the field 'Role'. If the input and field is not matching, the return error.
@@ -48,4 +52,4 @@ Function design:
 4. add_password: This function can only be used my admin user. It will add the password into the password collections in plaintext or sha256, plaintext will be add into collection password_list, hashed_password will be add into collection hashed_password_list. This will need to perform MongoDB query to create new object in the specific collection.
 5. convert_to_hash: This function is used to convert plain password to sha256.
 6. log_event: This function will be used to record the activities into, it will record: time, who, event and result.
-7. 
+7. follow_log_file: This function will be used to output the log at real time.
