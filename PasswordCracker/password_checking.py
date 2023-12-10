@@ -1,36 +1,48 @@
 import pymongo
 import hashlib
 import datetime
+import subprocess
 
-# Replace 'your_mongodb_url' with your actual MongoDB URL
+
+#MongoDB connection
 MONGO_URL = "mongodb://localhost:27017/"
 client = pymongo.MongoClient(MONGO_URL)
 
-# Connect to the specific database and collections
+# Define the database and collections as global variable
 db = client['CMPT789-Project']
 local_db = client['local']
 admin_info_collection = local_db['adminInfo']
 password_list_collection = local_db['Password-list1']
 hashed_password_list_collection = local_db['hashedPassword-list1']
 event_log_collection = local_db['event_log']
+log_file_path = '/Users/quzhenrong/Desktop/CMPT789-Project/CMPT789-Project/PasswordCracker/password_cracker_log.txt'
 
 # Function to hash a password
 def hash_input(input):
     return hashlib.sha256(input.encode()).hexdigest()
 
-# Function to check user credentials
+# Function to trace activities log
+def follow_log_file(log_file_path):
+    proc = subprocess.Popen(['tail', '-f', log_file_path], stdout=subprocess.PIPE)
+    try:
+        while True:
+            line = proc.stdout.readline()
+            if not line:
+                break
+            print(line.decode('utf-8'), end='')
+    except KeyboardInterrupt:
+        proc.terminate()
+        print("Stopped checking the log file.")
+
+# Function to check user credential
 def check_user_credential(input_user_name, input_password):
-    
-    # 这里的字段名'Username'和'Password'是根据您的MongoDB集合中的字段来的
     user_document = admin_info_collection.find_one({'Username': input_user_name, 'Password': input_password})
     hashed_user_document = admin_info_collection.find_one({'Username': hash_input(input_user_name), 'Password': hash_input(input_password)})
     if user_document or hashed_user_document:
-        # 如果找到匹配的文档，则返回对应的Role
         print("Login success! Welcome, " + input_user_name)
         log_event("Login as: " + input_user_name, " success!")
         return user_document['Role']        
     else:
-        # 如果没有找到匹配的文档，则返回错误信息
         return 'error'
 
 # Function to create a new user
@@ -46,7 +58,7 @@ def create_user(input_user_name, input_password):
             'Role': 'user'
         })
         log_event("Create new user: " + input_user_name, " success!")
-        return "User created!"
+        print("User created!")
 
 # Function to search for a password
 def search_password(input_password):
@@ -61,17 +73,16 @@ def search_password(input_password):
         log_event("Search Password :" + input_password, "Password not exist")
         return False
 
-# Function to add a password
+# Function to add a password into database
 def add_password(input_password):
     plain_password = input_password
     hashed_password = hash_input(plain_password)
     password_list_collection.insert_one({'Password': input_password})
     hashed_password_list_collection.insert_one({'Password': hashed_password})
     log_event("Add Password: " + input_password, " success!")
+    log_event("Add Password: " + hashed_password, " success!") 
 
-    
-
-# Function to log events
+# Function to create log events
 def log_event(event, result):
     with open("password_cracker_log.txt", "a") as log_file:
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -80,7 +91,7 @@ def log_event(event, result):
 # Main program logic
 def main():
     while True:
-        print("This program is used for detecting whether your password is being cracked or not")
+        print("This program is used for detecting whether your password is in the dictionary or not")
         print("Choose option: 1. Existing user 2. New user 3. Exit")
         choice = input()
         if choice == '1':
@@ -105,21 +116,22 @@ def main():
                             if search_password(password):
                                 print("Password already exist, please choose another password.")
                             else:
-                                print("Password not been used yet, congratulations.")
+                                print("Password not been used yet, it can be considered as safe.")
                                 add_password(password)
                         elif admin_choice == '2':
                             password = input("Enter password to add into the database: ")
                             add_password(password)
                             print("Add password into DB successful")
                         elif admin_choice == '3':
-                            # Retrieve and display logs
+                            follow_log_file(log_file_path)
                             pass
                         elif admin_choice == '4':
-                            print("Log out as" + username)
+                            print("Log out as " + username)
                             log_event("Log out as: " + username, " success!")
                             break
                     elif role == 'user':
-                        user_choice = input("Choose mode:1. Search  2. Exit")
+                        print("Choose mode:1. Search  2. Exit")
+                        user_choice = input()
                         if user_choice == '1':
                             password = input("Enter password to search: ")
                             if search_password(password):
@@ -127,7 +139,9 @@ def main():
                             else:
                                 print("Password is safe.")
                         elif user_choice == '2':
-                            return
+                            print("Log out as " + username)
+                            log_event("Log out as: " + username, " success!")
+                            break
                 else:
                     break
         elif choice == '2':
